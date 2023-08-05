@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsNotEmpty, IsString, IsUrl } from "class-validator";
+import { IsDate, IsInt, IsNotEmpty, IsNumber, IsString, IsUrl } from "class-validator";
 
 export class CreateLotteryDto {
   @ApiProperty({ required: true})
@@ -15,9 +15,11 @@ export class CreateLotteryDto {
   image: string;
   @ApiProperty({ required: true})
   @IsNotEmpty()
-  @IsDate()
-  init: Date;
+  init: Date | string;
   @ApiProperty()
-  @IsDate()
-  end: Date;
+  end: Date | string;
+  @ApiProperty({ required:true})
+  @IsNumber()
+  @IsInt()
+  totalTikes: number;
 }

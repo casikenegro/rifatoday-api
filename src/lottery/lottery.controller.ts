@@ -17,6 +17,7 @@ export class LotteryController {
 
   @Post()
   create(@Body() createLotteryDto: CreateLotteryDto) {
+    console.log()
     return this.lotteryService.create(createLotteryDto);
   }
 

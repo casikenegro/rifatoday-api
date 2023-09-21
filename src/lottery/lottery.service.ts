@@ -1,26 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { CreateLotteryDto } from './dto/create-lottery.dto';
 import { UpdateLotteryDto } from './dto/update-lottery.dto';
+import { PrismaService } from 'src/database/prisma.service';
+import { Ticket } from 'src/tickets/entities/ticket.entity';
+import { Lottery } from './entities/lottery.entity';
 
 @Injectable()
 export class LotteryService {
-  create(createLotteryDto: CreateLotteryDto) {
-    return 'This action adds a new lottery';
+  constructor(private prisma: PrismaService) {}
+
+  async create(data: CreateLotteryDto) {
+    const totalTikes = data.totalTikes
+    //delete data.totalTikes
+    const lottery = await this.prisma.lottery.create({
+      data: new Lottery({...data}),
+    });
+    let tickets: Ticket[]= [];
+    for (let i = 0; i < totalTikes; i++) {
+      tickets.push(new Ticket({
+        userId:     1, // TODO add userId by token
+        lotteryId:  lottery.id,
+        assignedAt: lottery.init,
+        number:     `${i}`.padStart(`${totalTikes}`.length,'0'),
+        status:     `Disponible`, // Disponible, Comprado, Reservado, Inhabilitado
+        winner: false,
+      }));
+    }
+    await this.prisma.ticket.createMany({ data: tickets as any});
+    return lottery;
   }
 
-  findAll() {
-    return `This action returns all lottery`;
+  findOne(id): Promise<Lottery | null> {
+    return this.prisma.lottery.findUnique({
+      where: { id },
+    });
+  }
+  findAll(): Promise<Lottery[]> {
+    return this.prisma.lottery.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} lottery`;
+  update(id, data): Promise<Lottery> {
+    return this.prisma.lottery.update({
+      data,
+      where: { id },
+    });
   }
 
-  update(id: number, updateLotteryDto: UpdateLotteryDto) {
-    return `This action updates a #${id} lottery`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} lottery`;
+  remove(id): Promise<Lottery> {
+    return this.prisma.lottery.delete({
+      where: { id },
+    });
   }
 }
+
